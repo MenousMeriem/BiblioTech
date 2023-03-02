@@ -22,7 +22,21 @@ const LivreModel = new mongoose.Schema ({
         Note: {
             type: String, 
             required: true,
-        }
+        },
+        Nb_emp: {
+            type: Number,
+            default: 0,
+        },
+        Nb_total: {
+            type: Number,
+            required: true,
+          },
+        Nb_res: {
+            type: Number,
+            default: function () {
+            return this.Nb_total
+        },
+    }
         
     })
 

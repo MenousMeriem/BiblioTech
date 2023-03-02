@@ -1,7 +1,8 @@
 const  mongoose = require("mongoose") 
 
 
-const EmpModel = new mongoose.schema({
+const EmpModele = new mongoose.Schema(
+    {
     
     Id_Livre:{
         type: mongoose.SchemaTypes.ObjectId,
@@ -13,18 +14,13 @@ const EmpModel = new mongoose.schema({
         ref: "utilisateur", 
         required: true,
     },
-    Date_emp:{
-        type: Date, 
+    Nbre_jr:{
+        type: Number,
         required: true,
     },
-    Retour:{
-        type: Boolean,
-        default: false,
-    },
-    Nbre_emp:{
-        type: Number, 
-        required: true,
-    }
-})
 
-module.exports = mongoose.model("Emprunt", EmpModel)
+    },
+    {timestamps: true}
+)
+
+module.exports = mongoose.model("Emprunt", EmpModele)
