@@ -35,9 +35,42 @@ const LivreModel = new mongoose.Schema ({
             type: Number,
             default: function () {
             return this.Nb_total
+        }
         },
-    }
         
-    })
+        Com:{
+            Commentaire: [{
+                type: String, 
+                required: false, 
+           
+                CommentaireCom: [{
+                    body: {
+                    type : String,
+                    required: false
+                },
+                
+                User: {
+                    type: mongoose.SchemaTypes.ObjectId,
+                    required: false,
+                    ref:"Utilisateur"
+                },
+                Date: {
+                    type: Date,
+                    default: new Date()
+                }
+
+                }]
+            }],
+            Date: {
+                type: Date, 
+                default: new Date()
+            }, 
+            User: {
+                type: mongoose.SchemaTypes.ObjectId,
+                required: false,
+                ref: "Utilisateur"
+            },
+        },})   
+
 
     module.exports = mongoose.model("Livre", LivreModel)
