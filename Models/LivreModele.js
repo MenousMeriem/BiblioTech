@@ -1,4 +1,6 @@
+
 const mongoose = require("mongoose")
+const Crypt = require("crypto")
 
 const LivreModel = new mongoose.Schema ({  
 
@@ -38,39 +40,43 @@ const LivreModel = new mongoose.Schema ({
         }
         },
         
-        Com:{
-            Commentaire: [{
+        Com:[{            
+            IdCom: {
                 type: String, 
-                required: false, 
-           
-                CommentaireCom: [{
-                    body: {
-                    type : String,
-                    required: false
-                },
-                
-                User: {
-                    type: mongoose.SchemaTypes.ObjectId,
-                    required: false,
-                    ref:"Utilisateur"
-                },
-                Date: {
-                    type: Date,
-                    default: new Date()
-                }
-
-                }]
-            }],
+                default: Crypt.randomUUID().split('-').join("")
+            },
             Date: {
                 type: Date, 
                 default: new Date()
             }, 
+
             User: {
                 type: mongoose.SchemaTypes.ObjectId,
                 required: false,
                 ref: "Utilisateur"
             },
-        },})   
+            body:String,
+            Commentaire: [{   
+                    body: {
+                        type : String,
+                        required: false
+                    },
+                    IdComm: {
+                        type: String, 
+                        default: Crypt.randomUUID().split('-').join("")
+                    },                
+                    User: {
+                        type: mongoose.SchemaTypes.ObjectId,
+                        required: false,
+                        ref:"Utilisateur"
+                    },
+                    Date: {
+                        type: Date,
+                        default: new Date()
+                    }
+            }],
+
+        }],})   
 
 
     module.exports = mongoose.model("Livre", LivreModel)

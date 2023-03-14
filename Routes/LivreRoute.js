@@ -12,7 +12,7 @@ const{
     modifierCommentaireCom,
     supprimerCommentairecom,
 } = require("../Controllers/LivreController")
-const { protectEmploye } = require("../Middleware/Protect")
+const { protectEmploye, protectClient } = require("../Middleware/Protect")
 
 const LivreRoute = require("express").Router()
 
@@ -23,12 +23,12 @@ LivreRoute
     .get("/AfficherNote/:Note",afficherLivreNote)
     .post("/Ajouter",protectEmploye, ajouterLivre)
     .delete("/Supprimer/:id", protectEmploye, supprimerLivre)
-    .put("/AjouterCom/:id", ajouterCommentaire)
+    .put("/AjouterCom/:id",protectClient, ajouterCommentaire)
     .put("/ModifierCom/:id", modifierCommentaire)
     .delete("/SupprimerCom/:id", supprimerCommentaire)
-    .put("/AjouterComCom/:id", ajouterCommentaireCom)
-    .put("/ModifierComCom/:id", modifierCommentaireCom)
-    .delete("/SupprimerComCom/:id", supprimerCommentairecom)
+    .put("/AjouterComCom/:id/:id_com",protectClient, ajouterCommentaireCom)
+    .put("/ModifierComCom/:IdCom", modifierCommentaireCom)
+    .delete("/SupprimerComCom/:IdCom", supprimerCommentairecom)
     module.exports = LivreRoute 
 
 
