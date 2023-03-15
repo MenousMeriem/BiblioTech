@@ -1,6 +1,8 @@
 
 const expressAsyncHandler = require("express-async-handler");
 const LivreModele = require("../Models/LivreModele");
+const nodemailer = require("nodemailer");
+const UtilisateurModel = require("../Models/UtilisateurModel");
 
 
 
@@ -72,10 +74,41 @@ exports.ajouterLivre = expressAsyncHandler(async (req,res) =>{
         if ( !IdCategorie || !Nom || !Auteur || !Note || !Disponible || !Nb_total || !Nb_emprunt) {
             res.status(400).json("Aucun livre n'est disponible")
         }
-        await LivreModele.create ({
+        const livre = await LivreModele.create ({
             IdCategorie,Nom, Auteur, Note, Disponible,Nb_total,Nb_emprunt
         })
-        res.status(201).json("Livre ajouté !! ")
+
+        const users = await UtilisateurModel.find()
+        users.forEach( us => {
+            const transporter = nodemailer.createTransport({
+                host: 'smtp.ethereal.email',
+                port: 587,
+                auth: {
+                    user: 'danial.hegmann@ethereal.email',
+                    pass: 'Trzm8hjdPFPaX49D9d'
+                }
+                });
+            
+                // send mail with defined transport object
+                let info =  transporter.sendMail({
+                from: 'meriemmenous1@gmail.com', // sender address
+                to:  us.Mail, // list of receivers
+                subject: "Hello ", // Subject line
+                text: `Nouveau Livre disponible ${livre.Nom}`, // plain text body
+                 },
+                function (error, info) {
+                    if (error) {
+                    console.log(error)
+                    } else {
+                    console.log("Email sent: " + info.response)
+                    }
+              })
+        })
+        
+
+    
+
+    res.status(201).json("Livre ajouté !! ")
     } catch (error) {
         res.status(400)
         console.log(error)
