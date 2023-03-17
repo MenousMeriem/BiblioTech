@@ -6,6 +6,7 @@ const UtilisateurRoute = require("./Routes/UtilisateurRoute")
 const EmpRoute = require("./Routes/EmpRoute")
 const CategorieRoute = require("./Routes/CategorieRoute")
 const AutoRoute = require ("./Routes/AutoRoute")
+const MoyenneRoute = require("./Routes/MoyenneRoute")
 
 require("dotenv").config()
 
@@ -18,6 +19,7 @@ index.use("/livre", LivreRoute)
 index.use("/emprunt", EmpRoute)
 index.use("/categorie", CategorieRoute)
 index.use("/login", AutoRoute)
+index.use("/Moyenne", MoyenneRoute)
 
 
 index.use("/*",(req,res) => {

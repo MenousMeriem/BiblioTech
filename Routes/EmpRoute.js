@@ -2,10 +2,10 @@
 const{
     afficherEmprunt,
     ajouterEmprunt,
-    historiqueAfficher,
-    historiqueSupprimer,
-    afficherStatistique,
     modifierEmprunt,
+    renouvelerEmprunt,
+    historiqueAfficher,
+    afficherStatistique,
 } = require("../Controllers/EmpController")
 const { protectClient } = require("../Middleware/Protect")
 
@@ -14,9 +14,10 @@ const EmpRoute = require("express").Router()
 EmpRoute
     .get("/Afficher", afficherEmprunt)
     .post("/Ajouter",protectClient, ajouterEmprunt)
+    .get("/ModifierEmp/:id", modifierEmprunt)
+    .put("/Renouveler/:id", renouvelerEmprunt)
     .get("/AfficherHis/:id", historiqueAfficher)
-    .delete("/SupprimerHis/:id", historiqueSupprimer)
     .get("/AfficherStatistiques", afficherStatistique)
-    .put("/ModifierEmp/:Id", modifierEmprunt)
-    
+
+
     module.exports = EmpRoute

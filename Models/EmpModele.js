@@ -18,6 +18,14 @@ const EmpModele = new mongoose.Schema(
         type: Number,
         required: true,
     },
+    Rendre:{
+        type: Boolean,
+        default: false, 
+    }, 
+    Renouveler: {
+        type: Boolean, 
+        default: false, 
+    }
 
     },
     {timestamps: true}

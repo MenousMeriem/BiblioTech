@@ -9,17 +9,13 @@ const nodemailer = require("nodemailer");
 exports.ajouterUtilisateur = expressAsyncHandler(async (req,res)=> {
     try {
         const {Motdepasse, ...body} = req.body
-       const user =  await UtilisateurModel.create({
+      
+        const user =  await UtilisateurModel.create({
             ...body,
             Motdepasse: await bcrypt.hash(Motdepasse, 12),
         })
 
-"use strict";
-  // Generate test SMTP service account from ethereal.email
-  // Only needed if you don't have a real mail account for testing
-
-  // create reusable transporter object using the default SMTP transport
-  const transporter = nodemailer.createTransport({
+    const transporter = nodemailer.createTransport({
     host: 'smtp.ethereal.email',
     port: 587,
     auth: {

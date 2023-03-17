@@ -49,9 +49,12 @@ const UtilisateurModel = new mongoose.Schema(
             enum: Role,
             default: "Employe",  
         },
+        active: {
+            type: Boolean,
+            defualt: true
+        }
     },
     {timestamps: true}
 )
-
 
 module.exports = mongoose.model("utilisateur", UtilisateurModel)

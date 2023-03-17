@@ -18,7 +18,7 @@ exports.afficherLivre = expressAsyncHandler(async (req,res) =>{
     }
 })
 
-//Afficher un livre par categorie 
+//Afficher un livre par categorie // QUERY 
 exports.afficherLivreCat = expressAsyncHandler(async (req,res) =>{
     try {
         const { IdCategorie } = req.params
@@ -70,12 +70,12 @@ exports.afficherLivreNote = expressAsyncHandler(async (req,res) =>{
 //Ajouter un livre : 
 exports.ajouterLivre = expressAsyncHandler(async (req,res) =>{
     try {
-        const {IdCategorie, Nom, Auteur, Note, Disponible,Nb_total, Nb_emprunt} = req.body
-        if ( !IdCategorie || !Nom || !Auteur || !Note || !Disponible || !Nb_total || !Nb_emprunt) {
+        const {IdCategorie, Nom, Auteur, Note, Nb_Total_Livre} = req.body
+        if ( !IdCategorie || !Nom || !Auteur || !Note || !Nb_Total_Livre) {
             res.status(400).json("Aucun livre n'est disponible")
         }
         const livre = await LivreModele.create ({
-            IdCategorie,Nom, Auteur, Note, Disponible,Nb_total,Nb_emprunt
+            IdCategorie,Nom, Auteur, Note, Nb_Total_Livre
         })
 
         const users = await UtilisateurModel.find()
@@ -105,10 +105,20 @@ exports.ajouterLivre = expressAsyncHandler(async (req,res) =>{
               })
         })
         
-
-    
-
     res.status(201).json("Livre ajouté !! ")
+    
+    } catch (error) {
+        res.status(400)
+        console.log(error)
+    }
+})
+
+//Modifier un livre : 
+exports.supprimerLivre = expressAsyncHandler(async (req,res) => {
+    try {
+        const {id} = req.params 
+        await LivreModele.findOneAndUpdate(id)
+        res.status(202).json("Livre modifié")
     } catch (error) {
         res.status(400)
         console.log(error)
@@ -135,7 +145,7 @@ exports.ajouterCommentaire = expressAsyncHandler(async (req,res) => {
             res.status(400).json("Le livre n'existe pas !!!")
         } 
         const exist = await LivreModele.findById(id)
-        if(exist.length ==0){
+        if(exist.length == 0){
         res.status(404)
         throw new Error(" Le livre n'existe pas !!!!")
        }
@@ -160,17 +170,12 @@ exports.modifierCommentaire = expressAsyncHandler(async (req,res) => {
         if (!id){
             res.status(400).json("Le livre n'existe pas !!!")
         } 
-        const exist = await LivreModele.findById(id)
-        if(exist.length == 0){
-        res.status(404)
-        throw new Error(" Le livre n'existe pas !!!!")
-       }
         const {Commentaire} = req.body
         if (!Commentaire) {
             res.status(400).json("Le commentaire n'existe pas !!!")
         }
         await LivreModele.findByIdAndUpdate( id, {
-            $push: { Commentaire}
+            $push: { Com: {User: req.utilisateur._id, body}}
         })
         res.status(201).json("Commentaire modifier !!! ")
 
@@ -187,22 +192,9 @@ exports.supprimerCommentaire = expressAsyncHandler(async (req,res) => {
         if (!id){
             res.status(400).json("Le livre n'existe pas !!!")
         } 
-        const exist = await LivreModele.findById(id)
-        if(exist.length == 0 ){
-        res.status(404)
-        throw new Error(" Le livre n'existe pas !!!!")
-        }
-
-        const {Commentaire} = req.body
-        console.log(req.body)
-        if (!Commentaire) {
-            res.status(400).json("Le commentaire n'existe pas !!!")
-        }
-        await LivreModele.findByIdAndDelete( id, {
-            $push: { Commentaire}
-        })
-        res.status(201).json("Commentaire supprimer !!! ")
-
+        await LivreModele.findByIdAndDelete(IdCom)
+        res.status(201).json("Commentaire modifier !!! ")
+    
         } catch (error) {
             res.status(400)
             console.log(error)

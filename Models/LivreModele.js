@@ -12,31 +12,28 @@ const LivreModel = new mongoose.Schema ({
         Nom: {
             type: String, 
             required: true, 
-        },
-        Disponible: {
-            type: String, 
-            required: true, 
+            unique: true, 
         },
         Auteur: {
             type: String, 
             required: true,
         },
         Note: {
-            type: String, 
+            type: Number, 
             required: true,
         },
-        Nb_emp: {
-            type: Number,
-            default: 0,
-        },
-        Nb_total: {
+        Nb_Total_Livre: {
             type: Number,
             required: true,
           },
-        Nb_res: {
+        Nb_Emp: {
+            type: Number,
+            default: 0,
+        },
+        Nb_Res_Livre: {
             type: Number,
             default: function () {
-            return this.Nb_total
+            return this.Nb_Total_Livre
         }
         },
         

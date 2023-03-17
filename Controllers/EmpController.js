@@ -8,6 +8,24 @@ const UtilisateurModel = require("../Models/UtilisateurModel");
 //Creer un emprunt : 
 exports.ajouterEmprunt = expressAsyncHandler(async(req,res) => {
     try {
+      const isActive = await UtilisateurModel.findById(req.utilisateur._id).select("active")
+      console.log(isActive.active)
+      const emps = await EmpModele.find({Id_Client: req.utilisateur._id})
+      let isError = false
+        const currentDate = new Date().getTime()
+        emps.forEach((m) => {
+            const duree = parseInt(m.Nbre_jr)*24*3600*1000
+            if((new Date(m.createdAt).getTime()+duree) < currentDate) {
+              isError=true
+                setTimeout(async () => {
+                  await UtilisateurModel.findByIdAndUpdate(req.utilisateur._id, {active: true})
+                },864000000)
+              }})
+              
+              if(isError) {                
+                await UtilisateurModel.findByIdAndUpdate(req.utilisateur._id, {active: false})
+                res.status(400)
+                throw new Error("Votre compte est temporairement suspendu")}
         const { Id_Livre, Nbre_jr } = req.body
 
       if (!Id_Livre || !Nbre_jr) {
@@ -19,26 +37,21 @@ exports.ajouterEmprunt = expressAsyncHandler(async(req,res) => {
         Id_Client: req.utilisateur?._id,
       })
       const Mois = 2629800000
-      const currentDate = new Date().getTime()
       let Empmois = []
       
-      Emprunt.forEach((a) => {
-        if(((new Date(a.createdAt).getTime())+(a.Nbre_jr*24*3600*1000)) < currentDate) {
-          res.status(400)
-          throw new Error("")
-        }
+      if(Emprunt.length > 0)
+     { Emprunt.forEach((a) => {
         if (new Date()  - new Date(a.createdAt) <= Mois) {
           return Empmois.push(a)
         }
-      })
+      })}
 
       if (Empmois.length >= 3) {
         res.status(400)
         throw new Error("Tu ne peux pas encore prendre un livre, vous avez dépassé 3 emprunts en un mois")
       } 
-
       const livre = await LivreModele.findById(Id_Livre)
-      if (livre?.Nb === 0) {
+      if (livre?.Nb_Res_Livre === 0) {
         res.status(400)
         throw new Error("Le Livre n'est pas disponible")
       }
@@ -48,14 +61,12 @@ exports.ajouterEmprunt = expressAsyncHandler(async(req,res) => {
         Id_Livre,
         Nbre_jr,
       })
-
       await UtilisateurModel.findByIdAndUpdate(req.utilisateur?._id, { $inc: { NBLE: 1 } })
       
       await LivreModele.findByIdAndUpdate(Id_Livre, {
-        $inc: { Nb_res: -1, Nb_emp: 1 },
+        $inc: { Nb_Res_Livre: -1, Nb_Emp: 1 },
       })
-
-      res.status(201).json("Le livre a bien été emprunté")
+          res.status(201).json("Le livre a bien été emprunté")
     } 
 
     catch (error) {
@@ -64,59 +75,57 @@ exports.ajouterEmprunt = expressAsyncHandler(async(req,res) => {
     }
   })
 
-// Afficher les pénalatités : 
 
-exports.afficherPenalites = expressAsyncHandler(async(req,res)=> {
-   
-  try {
-    const { Id_Livre, Nbre_jr } = req.body
 
-    if (!Id_Livre || !Nbre_jr) { 
-      res.status(400)
-      throw new Error("C'est vide !")
-    }
-    const Emp = await EmpModele.find({
-      Id_Client: req.utilisateur?._id,
-    })
-    console.log(req.utilisateur)
-    const Jrs = 864000000 
-    
-    Emp.forEach((a) => {
-      if (new Date()  - new Date(a.createdAt) <= Jrs) {
-        
-      }
-    }
-    
-  )} 
-  catch (error) {
-    res.status (400)
-    throw new Error (error)
-  }
-})
-
-  //Modifier un emprunts
+// Rendre un livre
   exports.modifierEmprunt = expressAsyncHandler(async(req,res) => {
-      try {
-        const { Id } = req.params
-        const { User } = req.body
-        
-        if (!User) {
-          res.status(400)
-          throw new Error("Utilisateur n'existe pas")
-        }
-        await EmpModele.findOneAndUpdate(
-          { User, Id_livre: Id },
-          { Rendre: true }
-        )
-        await LivreModele.findByIdAndUpdate(Id, { $inc: { Nb_res: 1 } })
-        res.status(202).json("Livre rendu !!!!!!")
+    try {
+      const { id } = req.params
+      const { Id_Client} = req.body
+    
+      if (!Id_Client) {
+        res.status(400)
+        throw new Error(" Utilisateur non dispo !!")
       } 
-      catch (error) {
+      await EmpModele.findOneAndUpdate({ Id_Client, Id_Livre: id },{ Rendre: true })
+      await LivreModele.findByIdAndUpdate(id, { $inc: {Nb_Res_Livre: 1} })
+        res.status(200).json("Livre rendu !!")
+      } 
+        catch (error) {
         res.status(400)
         throw new Error(error)
       }
-    }
-  )
+  })    
+
+//Renouveler les emprunts : 
+exports.renouvelerEmprunt = expressAsyncHandler( async(req,res) => {
+  try {
+      const { id } = req.params
+      const { Nbre_jr } = req.query
+      const Emprunt = await EmpModele.findById(id)
+      if (!Emprunt) {
+        res.status(400)
+        throw new Error("Emprunts non disponible !")
+      }
+      if (Emprunt.Renouveler === true) {
+        res.status(400)
+        throw new Error(" Emprunt deja renouveller !! !")
+      }
+      const Livre = await LivreModele.findById(idd)
+      if (!Livre) {
+        res.status(400)
+        throw new Error(" Livre non disponible !! !")
+      }
+
+      Emprunt.Nbre_jr += parseInt(Nbre_jr)
+      Emprunt.Renouveler = true
+      await Emprunt.save()
+
+  } catch (error) {
+      res.status(400)
+      console.Error(error)
+  }
+})
 
 
 //Afficher tous les emprunts : 
@@ -131,26 +140,23 @@ exports.afficherEmprunt = expressAsyncHandler(async(req,res) => {
 })
 
 
+
 // Afficher les statistiques : 
-// CHARTS 
 exports.afficherStatistique = expressAsyncHandler(async(req,res)=>{
     try {
-      
-      const Nb_livre = (await LivreModele.find()).length
-      const Nb_emp = (await EmpModele.find()).length
-      const Nb_total = (await EmpModele.find()).length
-      const Nb_res = (await EmpModele.find()).length
-      
+      const Nb_Total_Livre = (await LivreModele.find()).length
+      const Nb_Res_Livre = (await EmpModele.find()).length
+      const Nb_Emp = (await EmpModele.find()).length
+
       res.status(202).json({
-      livres_nb :`Nombre de livres est ${Nb_livre}`,
-      nb_emp :`Nombre de livres est ${Nb_emp}`,
-      nb_total :`Nombre de livres est ${Nb_total}`,
-      nb_res :`Nombre de livres est ${Nb_res}`,
+        Nb_Total_Livre :`Nombre de livres est ${ Nb_Total_Livre}`,
+        Nb_Emp :`Nombre d'emprunts est ${Nb_Emp}`,
+        Nb_Res_Livre :`Nombre des livres restants est ${Nb_Res_Livre}`,
       })
 
     } catch (err) {
       res.status(404)
-      console.Error(error)
+      console.Error(err)
     }
 })
 
@@ -158,49 +164,14 @@ exports.afficherStatistique = expressAsyncHandler(async(req,res)=>{
 //Afficher l'historique : 
 exports.historiqueAfficher = expressAsyncHandler(async(req,res) =>{ 
   try {
-  const {id} = req.params
-  if (!id){
-      res.status(400).json("L'id n'existe pas !!!")
-  } 
-
-  const exist = await UtilisateurModel.findById(id)
-  if(exist.length == 0){
-  res.status(404)
-  throw new Error("L'utilisateur n'existe pas !!!!")
-  }
-
-
-  const his = await EmpModele.findById(id)
-  res.status(201).json(his)
-
+    const his = await EmpModele.find({Id_Client: req.utilisateur?._id})
+    res.status(200).json(his)
   } catch (error) {
       res.status(400)
       console.log(error)
   }
 })
 
-//Supprimer l'historique: 
-exports.historiqueSupprimer = expressAsyncHandler(async(req,res) =>{ 
-  try {
 
-  const {id} = req.params
-  if (!id){
-      res.status(400).json("L'id n'existe pas !!!")
-  } 
-
-  const exist = await UtilisateurModel.findById(id)
-  if(exist.length ==0){
-  res.status(404)
-  throw new Error(" L'utilisateur n'existe pas !!!!")
- }
-  const his = await EmpModele.findByIdAndDelete(id)
-  res.status(201).json(his)
-
-  } catch (error) {
-      res.status(400)
-      console.log(error)
-  }
-})
- 
   
 
